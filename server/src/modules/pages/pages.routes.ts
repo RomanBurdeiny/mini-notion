@@ -7,6 +7,7 @@ export const pagesRouter = Router();
 
 pagesRouter.use(requireAuth);
 
+pagesRouter.get('/search', asyncHandler(pagesController.search));
 pagesRouter.get('/tree', asyncHandler(pagesController.getTree));
 pagesRouter.post('/', asyncHandler(pagesController.create));
 pagesRouter.get('/:id', asyncHandler(pagesController.getById));

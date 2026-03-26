@@ -292,4 +292,26 @@ describe('pages API', () => {
     const del = await request(app).delete(`/api/pages/${id}`).set(bearer(token)).expect(200);
     expect(del.body.page.isArchived).toBe(true);
   });
+
+  it('returns search results for owned pages', async () => {
+    const { token } = await registerUser(app, 'pg-search');
+    const wsId = await extraWorkspaceId(token, 'Search WS');
+
+    await request(app)
+      .post('/api/pages')
+      .set(bearer(token))
+      .send({ workspaceId: wsId, title: 'UniqueAlphaTitle', content: 'beta content' })
+      .expect(201);
+
+    const res = await request(app)
+      .get('/api/pages/search')
+      .query({ q: 'UniqueAlpha' })
+      .set(bearer(token))
+      .expect(200);
+
+    expect(Array.isArray(res.body.results)).toBe(true);
+    expect(res.body.results.length).toBeGreaterThanOrEqual(1);
+    const titles = res.body.results.map((p: { title: string }) => p.title);
+    expect(titles).toContain('UniqueAlphaTitle');
+  });
 });

@@ -27,7 +27,7 @@ export function RegisterPage() {
     setSubmitError(null);
     try {
       await registerUser(data);
-      navigate('/dashboard', { replace: true });
+      navigate('/dashboard/', { replace: true });
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Registration failed';
       setSubmitError(message);

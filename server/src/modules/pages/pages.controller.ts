@@ -3,6 +3,7 @@ import { HttpError } from '../../middlewares/http-error.js';
 import {
   createPageBodySchema,
   pageIdParamsSchema,
+  pageSearchQuerySchema,
   pageTreeQuerySchema,
   updatePageBodySchema,
 } from './pages.schema.js';
@@ -12,11 +13,21 @@ import {
   getPageById,
   getPageTree,
   restorePage,
+  searchPages,
   softDeletePage,
   updatePage,
 } from './pages.service.js';
 
 export const pagesController = {
+  search: async (req: Request, res: Response) => {
+    if (req.auth === undefined) {
+      throw new HttpError(401, 'Unauthorized');
+    }
+    const query = pageSearchQuerySchema.parse(req.query);
+    const results = await searchPages(req.auth.userId, query.q);
+    res.status(200).json({ results });
+  },
+
   getTree: async (req: Request, res: Response) => {
     if (req.auth === undefined) {
       throw new HttpError(401, 'Unauthorized');

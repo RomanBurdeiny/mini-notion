@@ -18,6 +18,24 @@ export const pageTreeQuerySchema = z
 
 export type PageTreeQuery = z.infer<typeof pageTreeQuerySchema>;
 
+const searchQueryParam = z.preprocess((val) => {
+  if (typeof val === 'string') {
+    return val.trim();
+  }
+  if (Array.isArray(val) && typeof val[0] === 'string') {
+    return val[0].trim();
+  }
+  return val;
+}, z.string().min(1).max(200));
+
+export const pageSearchQuerySchema = z
+  .object({
+    q: searchQueryParam,
+  })
+  .strict();
+
+export type PageSearchQuery = z.infer<typeof pageSearchQuerySchema>;
+
 export const pageIdParamsSchema = z
   .object({
     id: z.string().min(1),

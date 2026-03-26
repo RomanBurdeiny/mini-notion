@@ -96,6 +96,22 @@ export async function getPageTree(workspaceId: string, userId: string) {
   return tree;
 }
 
+export async function searchPages(userId: string, searchText: string): Promise<Page[]> {
+  const q = searchText.trim();
+  return prisma.page.findMany({
+    where: {
+      isArchived: false,
+      workspace: { ownerId: userId },
+      OR: [
+        { title: { contains: q, mode: 'insensitive' } },
+        { content: { contains: q, mode: 'insensitive' } },
+      ],
+    },
+    take: 50,
+    orderBy: { updatedAt: 'desc' },
+  });
+}
+
 export async function getPageById(pageId: string, userId: string): Promise<Page> {
   return getOwnedPage(pageId, userId);
 }
