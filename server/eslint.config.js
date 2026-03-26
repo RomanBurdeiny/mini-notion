@@ -12,6 +12,20 @@ export default tseslint.config(
       ecmaVersion: 2022,
       globals: globals.node,
     },
+    rules: {
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
+    },
+  },
+  {
+    extends: [js.configs.recommended, ...tseslint.configs.recommended],
+    files: ['test/**/*.ts', 'vitest.config.ts'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      globals: { ...globals.node, ...globals.vitest },
+    },
   },
   eslintConfigPrettier
 );

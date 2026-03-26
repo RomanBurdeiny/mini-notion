@@ -8,6 +8,7 @@ build/
 
 # Env
 .env
+.env.test
 .env.local
 .env.*.local
 

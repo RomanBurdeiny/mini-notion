@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import { config as loadDotenv } from 'dotenv';
 import { z } from 'zod';
 
 const envSchema = z.object({
@@ -14,29 +14,43 @@ export type Env = z.infer<typeof envSchema> & {
   JWT_SECRET: string;
 };
 
-const DEV_DB = 'postgresql://postgres:postgres@localhost:5432/mini_notion?schema=public';
+const DEV_DB =
+  'postgresql://mini_notion:mini_notion@localhost:5432/mini_notion?schema=public';
+
+const TEST_DB =
+  'postgresql://mini_notion:mini_notion@localhost:5432/mini_notion_test?schema=public';
+
 const DEV_JWT = 'dev-only-change-me-before-any-real-auth';
 
-export function loadEnv(): Env {
-  const parsed = envSchema.safeParse(process.env);
+/**
+ * Loads `.env` from cwd unless `process.env` was already populated (e.g. tests).
+ */
+export function loadDotenvIfPresent(): void {
+  loadDotenv();
+}
+
+export function parseEnv(source: NodeJS.ProcessEnv = process.env): Env {
+  const parsed = envSchema.safeParse(source);
   if (!parsed.success) {
-    console.error('Invalid environment variables:', parsed.error.flatten().fieldErrors);
-    process.exit(1);
+    throw new Error(`Invalid environment: ${parsed.error.message}`);
   }
+
   const data = parsed.data;
+
   if (data.NODE_ENV === 'production') {
     if (!data.DATABASE_URL?.trim()) {
-      console.error('DATABASE_URL is required in production');
-      process.exit(1);
+      throw new Error('DATABASE_URL is required in production');
     }
     if (!data.JWT_SECRET?.trim()) {
-      console.error('JWT_SECRET is required in production');
-      process.exit(1);
+      throw new Error('JWT_SECRET is required in production');
     }
   }
+
+  const defaultDb = data.NODE_ENV === 'test' ? TEST_DB : DEV_DB;
+
   return {
     ...data,
-    DATABASE_URL: data.DATABASE_URL?.trim() || DEV_DB,
+    DATABASE_URL: data.DATABASE_URL?.trim() || defaultDb,
     JWT_SECRET: data.JWT_SECRET?.trim() || DEV_JWT,
   };
 }
