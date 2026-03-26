@@ -33,3 +33,4 @@ coverage/
 
 # Vite
 client/dist/
+client/coverage/
